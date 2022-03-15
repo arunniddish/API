@@ -139,7 +139,6 @@ end
       end
   end
       
-
       
 if k ~= strt
 % Calculation of rotation matrix and translation
