@@ -2,7 +2,7 @@
 
 Lines of interest:
   1) Matlab
-     #53 to #57 \\
+     #53 to #57 
         % define the device (either Arduino or Seeeduino) serial communication
         % Timeout is defined so that it wait untils the mentioned time to
         % read from serial port 
@@ -21,3 +21,16 @@ Lines of interest:
             Td = num2str(Td_int);
             % writes string to serial port
             writeline(device,Td);
+            
+  2) Arduino 
+     #109 to #113
+     byte inChar;
+     if (Serial.available() > 0) {
+     inChar = Serial.readBytesUntil('\n', inString, 10);
+     inString[inChar] = '\0';
+     T_d = atoi(inString);
+     
+     #174 to #176
+     m = m+1;
+     m_char = (byte)m;
+     Serial.println(m_char);
