@@ -2,7 +2,7 @@
 
 Lines of interest:
   1) Matlab
-     #53 to #57 //
+     #53 to #57 \\
         % define the device (either Arduino or Seeeduino) serial communication
         % Timeout is defined so that it wait untils the mentioned time to
         % read from serial port 
