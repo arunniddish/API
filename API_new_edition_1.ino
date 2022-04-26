@@ -1,6 +1,6 @@
 /* BasicMSoRo.ino */
-/* Author: Caitlin Freeman
- * Last updated: 1/27/22
+/* Author: Arun Niddish Mahendran
+ * Last updated: 4/26/22
  * This code enables gait-based control of a multi-limbed robot with
  * with bang-bang (i.e., on/off) actuation. The user will use the 
  * user-defined parameter block to define
@@ -20,6 +20,8 @@
 const int8_t motor[] ={2,3,5,6,9,10,11,12};      // motor pins on Arduino
 const int T_transition = 450;    // total transition time constant in ms.
 const int T_unspool = 50;        // motor unspooling time constant in ms.
+int8_t cycle[20][20];
+int8_t cycle_gait[20];
 int8_t cycle1[10]; 
 int8_t cycle2[10];                       // input gait cycle 2
 String cmd;
@@ -39,13 +41,13 @@ int no_of_times_int;
 String check;
 String gait_length;
 int gait_length_int;
-int i = 0;
-
+int i,j ;
+int size_gait[10];
+String gaits = "ABCDEFGHIJ";
+int index;
 /* If you want to use more than 2 cycles make sure to also add variables
  * to define their lengths. 
  */
-
-
 /* Initializations (should not change) */
 const int8_t number_of_motors = sizeof(motor)/ 2;    // bang-bang control
 /* If more robot states are desired (e.g., including intermediate actuation
@@ -74,9 +76,6 @@ void setup() {
 void loop() 
 {
   while(Serial.available()==0){}
-//    byte ser_read;
-//    ser_read = Serial.readBytesUntil(' ', inString1, 100);
-//    inString1[ser_read] = '\0';
     cmd = serial_read(); /* Initializing the action to be performed - to define gaits("define") or execute the gaits("start")*/
     if(cmd == "define")
     {
@@ -163,32 +162,25 @@ void cycle_through_states (int8_t *cycle, int8_t cycle_size) {
  */
 void define_cycle()
 {
-//byte ser_read;
-//ser_read = Serial.readBytesUntil(' ', inString1, 100);
-//inString1[ser_read] = '\0';
   gait_type = serial_read();
-//  gait_length = serial_read();
-//  gait_length_int = gait_length.toInt();
-//  int8_t cycle1[gait_length_int];
+  index = gaits.indexOf(gait_type);
+  Serial.println(index);
   gait_value = "exist";
-  if(gait_type == "A")
-    {
+  i = 0;
       while(gait_value != "end")
        {
-//ser_read = Serial.readBytesUntil(' ', inString1, 100);
-//inString1[ser_read] = '\0';
           gait_value = serial_read();
           gait_value_int = gait_value.toInt();
           Serial.println(gait_value_int);
           if(gait_value != "end")
           {
-          cycle1[i++] = (int8_t)gait_value_int;
-//        i = i+1;  
+          cycle[index][i] = (int8_t)gait_value_int;
+          i = i+1;  
           }  
+       size_gait[index] = i;
        }
-        Serial.println("Defined"); /* This is printed so that Matlab can read it from Serial port for acknowledging that gait defining process 
-                                     has been completed*/
-    }
+        Serial.println("#Defined"); /* This is printed so that Matlab can read it from Serial port for acknowledging that gait defining process 
+                                     has been completed*/   
 }
 
 /*
@@ -198,22 +190,19 @@ void define_cycle()
 void start_cycle()
 {
   byte ser_read;
-//ser_read = Serial.readBytesUntil(' ', inString1, 100);
-//inString1[ser_read] = '\0';
-//gait_type = String(inString1);
   gait_type = serial_read();
-    if(gait_type == "A")
+  index = gaits.indexOf(gait_type);
+  for(j = 0;j<i;j++)
     {
-//ser_read = Serial.readBytesUntil(' ', inString1, 100);
-//inString1[ser_read] = '\0';
-      no_of_times = serial_read();
-      no_of_times_int = no_of_times.toInt();
-        for (int k=0; k<=no_of_times_int ; k++) 
+     cycle_gait[j] = cycle[index][j];
+    } 
+  no_of_times = serial_read();
+  no_of_times_int = no_of_times.toInt();
+      for (int k=0; k<=no_of_times_int ; k++) 
         {
 //          cycle_through_states(cycle1, cycle1_size);
-            cycle_through_states(cycle1, i);
-        }
-     }
+            cycle_through_states(cycle_gait, size_gait[index]);
+        } 
 }
 
 /* This functions reads data from serial port*/
